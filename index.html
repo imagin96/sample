@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VibeCoding — 느낌으로 코딩하다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070810;
+    --surface: #0d0f1e;
+    --border: rgba(255,255,255,0.07);
+    --accent: #7CFFD4;
+    --accent2: #FF6BBA;
+    --accent3: #6B8EFF;
+    --text: #e8e8f0;
+    --muted: #5a5a78;
+    --card-bg: rgba(255,255,255,0.03);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 5vw;
+    backdrop-filter: blur(20px);
+    background: rgba(7, 8, 16, 0.7);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.5rem 1.4rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent); color: var(--bg); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    padding: 10rem 5vw 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated gradient orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  .orb-1 { width: 600px; height: 600px; background: var(--accent); top: -150px; right: -100px; animation: drift1 12s ease-in-out infinite alternate; }
+  .orb-2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; left: 10%; animation: drift2 15s ease-in-out infinite alternate; }
+  .orb-3 { width: 300px; height: 300px; background: var(--accent3); top: 30%; left: 50%; animation: drift3 10s ease-in-out infinite alternate; }
+
+  @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(-80px, 60px) scale(1.2); } }
+  @keyframes drift2 { from { transform: translate(0,0); } to { transform: translate(60px, -40px); } }
+  @keyframes drift3 { from { transform: translate(0,0); } to { transform: translate(-40px, 40px) scale(0.8); } }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-tag::before { content: '$ '; color: var(--muted); }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 800px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  h1 .line2 { color: var(--accent); display: block; }
+  h1 .line3 { color: var(--muted); display: block; font-weight: 400; }
+
+  .hero-desc {
+    margin-top: 2.5rem;
+    max-width: 480px;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-buttons {
+    margin-top: 3rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.9rem 2.2rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,255,212,0.25); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.9rem 2.2rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-ghost:hover { border-color: var(--text); }
+
+  /* Floating code snippet */
+  .hero-code {
+    position: absolute;
+    right: 5vw; top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.8rem;
+    width: min(420px, 40vw);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.9;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeLeft 0.9s 1s forwards;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  }
+
+  .hero-code::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px;
+    width: 60px; height: 2px;
+    background: var(--accent);
+    border-radius: 0 0 2px 2px;
+  }
+
+  .code-header {
+    display: flex; gap: 6px; margin-bottom: 1.2rem;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #FF5F57; }
+  .dot-y { background: #FEBC2E; }
+  .dot-g { background: #28C840; }
+  .code-filename { margin-left: auto; font-size: 0.7rem; color: var(--muted); }
+
+  .c-kw { color: var(--accent2); }
+  .c-fn { color: var(--accent3); }
+  .c-str { color: var(--accent); }
+  .c-cm { color: #3d3d5c; font-style: italic; }
+  .c-var { color: var(--text); }
+
+  /* Cursor blink */
+  .cursor { display: inline-block; width: 2px; height: 1em; background: var(--accent); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ── MARQUEE ── */
+  .marquee-section {
+    padding: 1.2rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .marquee-track {
+    display: flex; gap: 3rem;
+    animation: marquee 25s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .marquee-item span { color: var(--accent); font-size: 1rem; }
+
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ── SECTIONS COMMON ── */
+  section { padding: 8rem 5vw; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 540px;
+    line-height: 1.8;
+  }
+
+  /* ── WHAT IS VIBE CODING ── */
+  #what {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .what-visual {
+    position: relative;
+    height: 420px;
+  }
+
+  .chat-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    max-width: 320px;
+    position: absolute;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .chat-bubble.visible { opacity: 1; transform: translateY(0); }
+
+  .bubble-user {
+    left: 0; top: 0;
+    border-left: 3px solid var(--accent2);
+  }
+  .bubble-ai {
+    right: 0; top: 80px;
+    border-left: 3px solid var(--accent);
+  }
+  .bubble-user2 {
+    left: 20px; top: 210px;
+    border-left: 3px solid var(--accent2);
+  }
+  .bubble-ai2 {
+    right: 0; top: 300px;
+    border-left: 3px solid var(--accent);
+  }
+
+  .bubble-role {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .bubble-user .bubble-role { color: var(--accent2); }
+  .bubble-ai .bubble-role,
+  .bubble-ai2 .bubble-role { color: var(--accent); }
+  .bubble-user2 .bubble-role { color: var(--accent2); }
+
+  /* ── FEATURES ── */
+  #features { background: var(--surface); }
+
+  .features-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+  .features-header .section-desc { margin: 0 auto; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    padding: 2.5rem;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card:hover { background: rgba(124,255,212,0.03); }
+  .feature-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover::after { opacity: 1; }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.7rem;
+  }
+  .feature-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+
+  /* ── HOW IT WORKS ── */
+  #how {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .steps { margin-top: 3rem; display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: flex; gap: 1.5rem;
+    padding: 1.8rem 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    position: relative;
+    transition: padding-left 0.3s;
+  }
+  .step:first-child { border-top: 1px solid var(--border); }
+  .step:hover, .step.active { padding-left: 0.5rem; }
+  .step.active::before {
+    content: '';
+    position: absolute; left: -5vw; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+  }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding-top: 0.3rem;
+    min-width: 24px;
+    transition: color 0.3s;
+  }
+  .step.active .step-num { color: var(--accent); }
+
+  .step-content h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    transition: color 0.3s;
+  }
+  .step.active h3 { color: var(--accent); }
+  .step-content p { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
+
+  .how-visual {
+    position: sticky;
+    top: 8rem;
+  }
+
+  .terminal {
+    background: #0a0b14;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+  }
+  .terminal-header {
+    background: var(--surface);
+    padding: 0.9rem 1.2rem;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-body {
+    padding: 1.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 2;
+    min-height: 280px;
+  }
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-out { color: var(--muted); }
+  .t-success { color: #28C840; }
+  .t-line { display: block; opacity: 0; }
+  .t-line.show { animation: fadeIn 0.3s forwards; }
+
+  /* ── STATS ── */
+  #stats {
+    background: var(--surface);
+    text-align: center;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 4rem;
+    margin-top: 4rem;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+  .stat-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    display: block;
+  }
+
+  /* ── TESTIMONIALS ── */
+  #testimonials { overflow: hidden; }
+  .testimonials-header { margin-bottom: 4rem; }
+
+  .testimonials-scroll {
+    display: flex; gap: 1.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+  }
+  .testimonials-scroll::-webkit-scrollbar { display: none; }
+
+  .testimonial-card {
+    flex-shrink: 0;
+    width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    scroll-snap-align: start;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .testimonial-card:hover { border-color: rgba(124,255,212,0.2); }
+  .testimonial-quote {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .testimonial-quote::before { content: '"'; color: var(--accent); font-size: 1.5rem; line-height: 0; vertical-align: -0.3em; margin-right: 4px; }
+  .testimonial-author { display: flex; align-items: center; gap: 1rem; }
+  .author-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .author-name { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; }
+  .author-role { color: var(--muted); font-size: 0.78rem; margin-top: 0.1rem; }
+
+  /* ── CTA ── */
+  #cta {
+    text-align: center;
+    padding: 10rem 5vw;
+    position: relative;
+    overflow: hidden;
+  }
+  #cta::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    width: 800px; height: 800px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(124,255,212,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  #cta h2 { max-width: 640px; margin: 0 auto 1.5rem; }
+  #cta .section-desc { margin: 0 auto 3rem; }
+
+  .cta-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 1.5rem;
+    display: block;
+  }
+  .cta-mono em { color: var(--accent); font-style: normal; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+  .footer-logo span { color: var(--accent); }
+  footer p { color: var(--muted); font-size: 0.82rem; }
+  .footer-links { display: flex; gap: 2rem; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeLeft { from { opacity: 0; transform: translate(40px, -50%); } to { opacity: 1; transform: translate(0, -50%); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    #what, #how {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .hero-code { display: none; }
+    h1 { font-size: clamp(2.5rem, 10vw, 4rem); }
+    .nav-links { display: none; }
+    .what-visual { height: 350px; }
+    .how-visual { position: static; }
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 1rem 4vw; }
+    section { padding: 5rem 4vw; }
+    .stats-grid { gap: 2.5rem; }
+    .testimonial-card { width: 300px; }
+    footer { flex-direction: column; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; }
+  }
+
+  /* ── CUSTOM SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Vibe<span>Coding</span></a>
+  <ul class="nav-links">
+    <li><a href="#what">소개</a></li>
+    <li><a href="#features">기능</a></li>
+    <li><a href="#how">방법</a></li>
+    <li><a href="#testimonials">후기</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">무료 시작</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-tag">vibe coding — 새로운 개발 패러다임</div>
+  <h1>
+    코드를<br>
+    <span class="line2">느끼듯</span>
+    <span class="line3">만드세요</span>
+  </h1>
+  <p class="hero-desc">
+    말하면 만들어집니다. AI와 대화하며 아이디어를 코드로,<br>
+    코드를 제품으로 — 당신의 창의력이 한계입니다.
+  </p>
+  <div class="hero-buttons">
+    <a href="#" class="btn-primary">지금 시작하기 →</a>
+    <a href="#what" class="btn-ghost">더 알아보기</a>
+  </div>
+
+  <!-- Floating code card -->
+  <div class="hero-code">
+    <div class="code-header">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="code-filename">app.vibe</span>
+    </div>
+    <span class="c-cm">// 🎵 느낌으로 시작하세요</span><br>
+    <span class="c-kw">describe</span><span class="c-var">(</span><span class="c-str">"내가 원하는 앱"</span><span class="c-var">) {</span><br>
+    &nbsp;&nbsp;<span class="c-fn">it</span><span class="c-var">(</span><span class="c-str">"사용자 로그인이 있어야 함"</span><span class="c-var">)</span><br>
+    &nbsp;&nbsp;<span class="c-fn">it</span><span class="c-var">(</span><span class="c-str">"대시보드가 예뻐야 함"</span><span class="c-var">)</span><br>
+    &nbsp;&nbsp;<span class="c-fn">it</span><span class="c-var">(</span><span class="c-str">"데이터가 실시간으로 보여야 함"</span><span class="c-var">)</span><br>
+    <span class="c-var">}</span><br><br>
+    <span class="c-cm">// AI가 나머지를 처리합니다 ✨</span><br>
+    <span class="c-kw">await</span> <span class="c-fn">vibe</span><span class="c-var">.</span><span class="c-fn">build</span><span class="c-var">()</span><span class="cursor"></span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section" aria-hidden="true">
+  <div class="marquee-track" id="marquee">
+    <!-- items duplicated in JS -->
+  </div>
+</div>
+
+<!-- WHAT IS VIBE CODING -->
+<section id="what">
+  <div class="what-text">
+    <div class="section-label reveal">/ 바이브코딩이란</div>
+    <h2 class="reveal reveal-delay-1">AI와 함께<br>흐름을 타다</h2>
+    <p class="section-desc reveal reveal-delay-2">
+      바이브코딩(Vibe Coding)은 Andrej Karpathy가 제안한 개발 방식입니다.
+      세밀한 구현 대신 <strong>의도와 방향</strong>을 AI에게 전달하고,
+      AI가 코드를 생성하면 개발자는 검토·조율하며 빠르게 완성합니다.
+    </p>
+    <p class="section-desc reveal reveal-delay-3" style="margin-top:1.2rem">
+      코드 한 줄 외우지 않아도 됩니다. 아이디어만 있으면 충분합니다.
+    </p>
+  </div>
+
+  <div class="what-visual reveal reveal-delay-1" id="chatDemo">
+    <div class="chat-bubble bubble-user">
+      <div class="bubble-role">나</div>
+      간단한 할 일 관리 앱 만들어줘. 드래그로 순서 바꿀 수 있게.
+    </div>
+    <div class="chat-bubble bubble-ai">
+      <div class="bubble-role">AI</div>
+      네! React + Framer Motion으로 드래그 가능한 Todo 앱 만들어드릴게요. 로컬스토리지도 연결할까요?
+    </div>
+    <div class="chat-bubble bubble-user2">
+      <div class="bubble-role">나</div>
+      응, 그리고 다크모드도 추가해줘
+    </div>
+    <div class="chat-bubble bubble-ai2">
+      <div class="bubble-role">AI</div>
+      완료! 총 47줄의 코드로 모든 기능 구현했습니다 ✅
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-header">
+    <div class="section-label reveal">/ 핵심 기능</div>
+    <h2 class="reveal reveal-delay-1">개발의 모든 단계를<br>AI와 함께</h2>
+    <p class="section-desc reveal reveal-delay-2">복잡한 설정 없이, 바로 지금 만들기 시작하세요</p>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <span class="feature-icon">💬</span>
+      <div class="feature-title">자연어 코딩</div>
+      <p class="feature-desc">한국어로 원하는 기능을 설명하면, AI가 즉시 코드로 변환합니다. 문법 몰라도 OK.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⚡</span>
+      <div class="feature-title">실시간 미리보기</div>
+      <p class="feature-desc">코드가 생성되는 순간 결과물이 화면에 나타납니다. 즉각적인 피드백으로 빠른 반복.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔧</span>
+      <div class="feature-title">스마트 디버깅</div>
+      <p class="feature-desc">에러가 발생하면 원인을 분석하고 수정 방법을 제안합니다. 스택 트레이스는 AI가 읽어줍니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎨</span>
+      <div class="feature-title">디자인 자동화</div>
+      <p class="feature-desc">레이아웃과 스타일도 AI가 제안합니다. "더 예쁘게"라고 말하면 AI가 알아서 개선합니다.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📦</span>
+      <div class="feature-title">원클릭 배포</div>
+      <p class="feature-desc">완성된 프로젝트를 한 번의 클릭으로 전 세계에 배포하세요. CI/CD 설정 없이 바로.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🤝</span>
+      <div class="feature-title">팀 협업</div>
+      <p class="feature-desc">AI 히스토리를 팀과 공유하고, 서로의 바이브를 이어받아 개발합니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="how-text">
+    <div class="section-label reveal">/ 사용 방법</div>
+    <h2 class="reveal reveal-delay-1">세 단계로<br>완성합니다</h2>
+
+    <div class="steps reveal reveal-delay-2">
+      <div class="step active" data-step="0" onclick="selectStep(0)">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <h3>아이디어를 말하세요</h3>
+          <p>만들고 싶은 것을 한국어로 자유롭게 설명합니다. 기획서나 스펙 문서 없이도 됩니다.</p>
+        </div>
+      </div>
+      <div class="step" data-step="1" onclick="selectStep(1)">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <h3>AI가 코드를 생성합니다</h3>
+          <p>Claude AI가 최적의 기술 스택을 선택하고, 작동하는 코드를 즉시 생성합니다.</p>
+        </div>
+      </div>
+      <div class="step" data-step="2" onclick="selectStep(2)">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <h3>조율하고 배포하세요</h3>
+          <p>마음에 들지 않는 부분은 대화로 수정하고, 완성되면 바로 배포합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="how-visual reveal reveal-delay-2">
+    <div class="terminal">
+      <div class="terminal-header">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span style="margin-left:8px; font-family:'DM Mono',monospace; font-size:0.72rem; color:var(--muted)">vibecoding — zsh</span>
+      </div>
+      <div class="terminal-body" id="terminalBody">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="section-label reveal" style="text-align:center">/ 숫자로 보는 바이브코딩</div>
+  <div class="stats-grid">
+    <div class="reveal">
+      <span class="stat-num" data-target="10">0</span>
+      <span class="stat-label">배 빠른 초기 개발 속도</span>
+    </div>
+    <div class="reveal reveal-delay-1">
+      <span class="stat-num" data-target="87">0</span>
+      <span class="stat-label" style="color:var(--muted)">% 개발자가 만족도 향상 보고</span>
+    </div>
+    <div class="reveal reveal-delay-2">
+      <span class="stat-num" data-target="3">0</span>
+      <span class="stat-label">분 안에 프로토타입 완성</span>
+    </div>
+    <div class="reveal reveal-delay-3">
+      <span class="stat-num" data-target="50000">0</span>
+      <span class="stat-label">명의 개발자가 사용 중</span>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="testimonials-header">
+    <div class="section-label reveal">/ 사용자 후기</div>
+    <h2 class="reveal reveal-delay-1">개발자들이<br>말합니다</h2>
+  </div>
+
+  <div class="testimonials-scroll reveal">
+    <div class="testimonial-card">
+      <p class="testimonial-quote">원래 React 컴포넌트 하나 만드는 데 반나절 걸렸는데, 이제 10분이면 됩니다. 바이브코딩은 그냥 트렌드가 아니에요. 개발 방식의 진짜 변화입니다.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">🧑‍💻</div>
+        <div>
+          <div class="author-name">이민준</div>
+          <div class="author-role">프론트엔드 개발자 · 스타트업</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <p class="testimonial-quote">기획자인데 직접 프로토타입을 만들 수 있게 됐어요. 개발팀에 의존하지 않고 아이디어를 빠르게 검증하는 게 이렇게 쉬울 줄 몰랐습니다.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👩‍🎨</div>
+        <div>
+          <div class="author-name">박서연</div>
+          <div class="author-role">프로덕트 매니저 · 핀테크</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <p class="testimonial-quote">데이터 분석 스크립트를 짤 때마다 StackOverflow를 뒤졌는데, 이제 그냥 말하면 됩니다. 코드보다 분석 결과에 집중할 수 있어졌어요.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">📊</div>
+        <div>
+          <div class="author-name">김도현</div>
+          <div class="author-role">데이터 사이언티스트 · 금융</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <p class="testimonial-quote">비전공자로 앱 만들기를 포기했었는데, 바이브코딩으로 3주 만에 첫 번째 앱을 출시했습니다. 정말 누구나 개발자가 될 수 있는 시대가 왔네요.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">🚀</div>
+        <div>
+          <div class="author-name">최지아</div>
+          <div class="author-role">인디 해커 · 솔로 파운더</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <p class="testimonial-quote">시니어 개발자도 바이브코딩을 쓰면 더 빠릅니다. 보일러플레이트 작성 시간을 없애고 진짜 중요한 로직에만 집중할 수 있어요.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">⚙️</div>
+        <div>
+          <div class="author-name">정우성</div>
+          <div class="author-role">백엔드 엔지니어 · 대기업</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="section-label reveal">/ 지금 시작하세요</div>
+  <h2 class="reveal reveal-delay-1">아이디어를<br>현실로 만들 시간</h2>
+  <p class="section-desc reveal reveal-delay-2">신용카드 불필요. 설치 없음. 지금 바로 대화 시작.</p>
+  <div class="reveal reveal-delay-3">
+    <a href="#" class="btn-primary" style="font-size:1.05rem; padding:1rem 2.8rem">무료로 시작하기 →</a>
+    <span class="cta-mono">$ vibe init my-dream-app<em> ✓ ready in 0.3s</em></span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Vibe<span>Coding</span></div>
+  <p>© 2025 VibeCoding. 느낌으로 만드는 세상.</p>
+  <div class="footer-links">
+    <a href="#">소개</a>
+    <a href="#">블로그</a>
+    <a href="#">문서</a>
+    <a href="#">GitHub</a>
+    <a href="#">연락하기</a>
+  </div>
+</footer>
+
+<script>
+// ── MARQUEE ──
+const marqueeItems = [
+  '자연어 코딩', 'AI 페어 프로그래밍', '실시간 미리보기',
+  '원클릭 배포', '스마트 디버깅', '바이브코딩',
+  'No Code? Flow Code!', '아이디어 → 제품', '10배 빠른 개발'
+];
+const track = document.getElementById('marquee');
+const allItems = [...marqueeItems, ...marqueeItems];
+track.innerHTML = allItems.map(t =>
+  `<span class="marquee-item"><span>◆</span>${t}</span>`
+).join('');
+
+// ── REVEAL ON SCROLL ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── CHAT BUBBLES ──
+const chatObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const bubbles = e.target.querySelectorAll('.chat-bubble');
+      bubbles.forEach((b, i) => {
+        setTimeout(() => b.classList.add('visible'), i * 400);
+      });
+      chatObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+const chatDemo = document.getElementById('chatDemo');
+if (chatDemo) chatObserver.observe(chatDemo);
+
+// ── TERMINAL ANIMATION ──
+const terminalSteps = [
+  [
+    { text: '$ vibe "간단한 할 일 관리 앱 만들어줘"', cls: 'c-kw', delay: 100 },
+    { text: '✓ 프로젝트 초기화 중...', cls: 't-out', delay: 700 },
+    { text: '✓ React + TypeScript 선택됨', cls: 't-success', delay: 1200 },
+    { text: '✓ 컴포넌트 생성 완료 (12개)', cls: 't-success', delay: 1700 },
+    { text: '✓ http://localhost:3000 에서 실행 중', cls: 't-success', delay: 2200 },
+  ],
+  [
+    { text: '$ vibe "드래그 기능이랑 다크모드도 추가해줘"', cls: 'c-kw', delay: 100 },
+    { text: '✓ @dnd-kit/core 설치 중...', cls: 't-out', delay: 600 },
+    { text: '✓ DragDropContext 통합 완료', cls: 't-success', delay: 1100 },
+    { text: '✓ CSS 변수 기반 다크모드 적용', cls: 't-success', delay: 1600 },
+    { text: '✓ 변경사항 6개 파일 적용됨', cls: 't-success', delay: 2100 },
+  ],
+  [
+    { text: '$ vibe deploy --prod', cls: 'c-kw', delay: 100 },
+    { text: '✓ 빌드 최적화 중 (bundle: 42kb)', cls: 't-out', delay: 700 },
+    { text: '✓ Vercel Edge Network 배포 중...', cls: 't-out', delay: 1200 },
+    { text: '✓ 배포 완료!', cls: 't-success', delay: 1800 },
+    { text: '🌐 https://my-todo-app.vercel.app', cls: 'c-str', delay: 2300 },
+  ]
+];
+
+let currentStep = 0;
+let terminalTimeout = null;
+
+function animateTerminal(stepIdx) {
+  const body = document.getElementById('terminalBody');
+  body.innerHTML = '';
+  if (terminalTimeout) clearTimeout(terminalTimeout);
+  const lines = terminalSteps[stepIdx] || terminalSteps[0];
+  lines.forEach(line => {
+    terminalTimeout = setTimeout(() => {
+      const span = document.createElement('span');
+      span.className = `t-line ${line.cls} show`;
+      span.textContent = line.text;
+      body.appendChild(span);
+      body.appendChild(document.createElement('br'));
+    }, line.delay);
+  });
+}
+
+function selectStep(idx) {
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.toggle('active', i === idx);
+  });
+  currentStep = idx;
+  animateTerminal(idx);
+}
+
+// Auto-cycle terminal
+function cycleTerm() {
+  let s = 0;
+  animateTerminal(s);
+  setInterval(() => {
+    s = (s + 1) % 3;
+    selectStep(s);
+  }, 5000);
+}
+
+const termObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      cycleTerm();
+      termObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+const termEl = document.querySelector('.terminal');
+if (termEl) termObserver.observe(termEl);
+
+// ── COUNTER ANIMATION ──
+function animateCounter(el, target, duration = 1800) {
+  const isLarge = target >= 1000;
+  let start = 0;
+  const step = timestamp => {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = Math.round(eased * target);
+    el.textContent = isLarge ? val.toLocaleString() : val;
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = isLarge ? target.toLocaleString() : target;
+  };
+  requestAnimationFrame(step);
+}
+
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const target = parseInt(el.dataset.target);
+      animateCounter(el, target);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+
+// ── NAV ACTIVE STATE ──
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  nav.style.background = window.scrollY > 50
+    ? 'rgba(7,8,16,0.95)'
+    : 'rgba(7,8,16,0.7)';
+});
+</script>
+</body>
+</html>
